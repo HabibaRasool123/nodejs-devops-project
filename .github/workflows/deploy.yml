@@ -1,0 +1,45 @@
+name: CI-CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-north-1
+
+      - name: Login to Amazon ECR
+        run: |
+          aws ecr get-login-password --region eu-north-1 | docker login --username AWS --password-stdin 629614691743.dkr.ecr.eu-north-1.amazonaws.com
+
+      - name: Build Docker Image
+        run: |
+          docker build -t nodejs-app .
+
+      - name: Tag Image
+        run: |
+          docker tag nodejs-app:latest 629614691743.dkr.ecr.eu-north-1.amazonaws.com/nodejs-app:latest
+
+      - name: Push Image to ECR
+        run: |
+          docker push 629614691743.dkr.ecr.eu-north-1.amazonaws.com/nodejs-app:latest
+                - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            docker pull 629614691743.dkr.ecr.eu-north-1.amazonaws.com/nodejs-app:latest
+            kubectl rollout restart deployment nodejs-app
