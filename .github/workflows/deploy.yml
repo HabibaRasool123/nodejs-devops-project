@@ -2,7 +2,8 @@ name: CI-CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
   build-and-deploy:
@@ -34,7 +35,8 @@ jobs:
       - name: Push Image to ECR
         run: |
           docker push 629614691743.dkr.ecr.eu-north-1.amazonaws.com/nodejs-app:latest
-                - name: Deploy to EC2 via SSH
+
+      - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
