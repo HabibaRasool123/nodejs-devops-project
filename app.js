@@ -10,7 +10,7 @@ app.get('/', (req, res) => {
     visitors++;
 
     res.send(`
-        <h1>DevOps Project</h1>
+        <h1>CI/CD Project</h1>
         <p><strong>Timestamp:</strong> ${new Date()}</p>
         <p><strong>Container ID:</strong> ${os.hostname()}</p>
         <p><strong>Visitors:</strong> ${visitors}</p>
